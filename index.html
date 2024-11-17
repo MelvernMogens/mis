@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truffle Belly Analysis</title>
+    <style>
+      :root {
+        --primary-yellow: #ffc300;
+        --primary-red: #ff5733;
+        --primary-black: #000000;
+        --primary-white: #ffffff;
+        --secondary-orange: #ffa500;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--primary-yellow);
+      }
+
+      .upload-container {
+        width: 80%;
+        max-width: 800px;
+        margin: 20px auto;
+        background: var(--primary-red);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      .upload-container h1 {
+        margin-bottom: 20px;
+        color: var(--primary-white);
+        font-size: 2em;
+      }
+
+      .file-input {
+        margin: 15px 0;
+        padding: 10px;
+        font-size: 1em;
+        border: 2px solid var(--primary-black);
+        border-radius: 6px;
+        background-color: var(--primary-white);
+        color: var(--primary-black);
+        cursor: pointer;
+      }
+
+      .charts-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        width: 90%;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .chart-container {
+        flex: 1;
+        background: var(--primary-white);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .chart-container h2 {
+        margin-bottom: 20px;
+        font-size: 1.8em;
+        color: var(--primary-red);
+      }
+
+      .chart {
+        width: 100%;
+        height: 100%;
+      }
+
+      canvas {
+        max-width: 100%;
+        max-height: 85%;
+      }
+
+      .btn {
+        display: inline-block;
+        background: var(--primary-black);
+        color: var(--primary-white);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+      }
+
+      .btn:hover {
+        background: var(--secondary-orange);
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="upload-container">
+      <h1>Truffle Belly Analysis</h1>
+      <input
+        type="file"
+        id="csvFile"
+        class="file-input"
+        accept=".csv"
+        onchange="processCSV()"
+      />
+    </div>
+
+    <div class="charts-container">
+      <div class="chart-container">
+        <h2>Best Seller Products</h2>
+        <canvas id="chart1" class="chart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h2>Sales Per Hour</h2>
+        <canvas id="chart2" class="chart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      let pieChart, barChart;
+
+      function processCSV() {
+        const fileInput = document.getElementById("csvFile");
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please upload a CSV file.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const text = event.target.result;
+          const data = parseCSV(text);
+          generateCharts(data);
+        };
+        reader.readAsText(file);
+      }
+
+      function parseCSV(text) {
+        const rows = text.split("\n").map((row) => row.split(","));
+        const headers = rows.shift();
+        const data = rows.map((row) => {
+          const obj = {};
+          headers.forEach((header, index) => {
+            obj[header.trim()] = row[index]?.trim();
+          });
+          return obj;
+        });
+        return data;
+      }
+
+      function resetCanvasSize(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+
+      function generateCharts(data) {
+        resetCanvasSize("chart1");
+        resetCanvasSize("chart2");
+
+        if (pieChart) pieChart.destroy();
+        if (barChart) barChart.destroy();
+
+        const productSales = {};
+        const hourlySales = Array(24).fill(0);
+
+        data.forEach((row) => {
+          const product = row["Pesanan"];
+          const quantity = parseInt(row["Quantity"]) || 0;
+          const time = row["Jam"];
+
+          if (product) {
+            productSales[product] = (productSales[product] || 0) + quantity;
+          }
+
+          if (time) {
+            const hour = parseInt(time.split(":")[0]);
+            hourlySales[hour] += quantity;
+          }
+        });
+
+        const filteredHours = [...Array(24).keys()].slice(9);
+        const filteredSales = hourlySales.slice(9);
+
+        pieChart = new Chart(document.getElementById("chart1"), {
+          type: "pie",
+          data: {
+            labels: Object.keys(productSales),
+            datasets: [
+              {
+                label: "Total Quantity Sold",
+                data: Object.values(productSales),
+                backgroundColor: [
+                  "#FF5733",
+                  "#FFC300",
+                  "#FFA500",
+                  "#FFBD69",
+                  "#FFD700",
+                ],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        barChart = new Chart(document.getElementById("chart2"), {
+          type: "bar",
+          data: {
+            labels: filteredHours.map((hour) => `${hour}:00`),
+            datasets: [
+              {
+                label: "Total Sales Quantity",
+                data: filteredSales,
+                backgroundColor: "#FF5733",
+              },
+            ],
+          },
+          options: {
+            responsive: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { font: { size: 14, color: "#000000" } } },
+              y: { ticks: { font: { size: 14, color: "#000000" } } },
+            },
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
