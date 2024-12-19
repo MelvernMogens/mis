@@ -47,29 +47,21 @@
         top: 0;
         padding: 0;
       }
-#spin-btn {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
-  height: 70px; /* size increased */
-  width: 70px; /* size increased */
-  border-radius: 50%; /* fully circular */
-  cursor: pointer;
-  border: 0;
-  background: radial-gradient(#ffd084 50%, #e07b39 85%); /* lighter chocolate gradient */
-  color: #4a2c1e; /* deep chocolate text */
-  text-transform: uppercase;
-  font-size: 1.5em;
-  font-weight: 600;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* subtle shadow for 3D effect */
-  transition: box-shadow 0.3s ease; /* only transition the shadow */
-}
-
-#spin-btn:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* stronger shadow on hover */
-}
-
+      #spin-btn {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        height: 70px;
+        width: 70px;
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: box-shadow 0.3s ease;
+      }
+      #spin-btn:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* stronger shadow on hover */
+      }
       img {
         position: absolute;
         width: 4em;
@@ -97,11 +89,18 @@
     <div class="wrapper">
       <div class="container">
         <canvas id="wheel"></canvas>
-        <button id="spin-btn">Spin</button>
+        <img
+          id="spin-btn"
+          src="https://i.postimg.cc/rpt45My4/Clipped-image-20241219-115313.png"
+          alt="Spin Button"
+        />
         <img
           src="https://www.freeiconspng.com/img/2557"
           alt="spinner arrow"
         />
+      </div>
+      <div id="final-value">
+        <p>Click On The Spin Button To Start</p>
       </div>
     </div>
 
@@ -165,7 +164,7 @@
       const valueGenerator = (angleValue) => {
         for (let i of rotationValues) {
           if (angleValue >= i.minDegree && angleValue <= i.maxDegree) {
-            finalValue.innerHTML = `<p>Value: ${i.value}</p>`;
+            finalValue.innerHTML = `<p> ${i.value}</p>`;
             spinBtn.disabled = false;
             break;
           }
