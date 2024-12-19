@@ -1,245 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Truffle Belly Analysis</title>
+    <title>Spin Wheel App</title>
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Chart.js Plugin for displaying text over chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.1.0/chartjs-plugin-datalabels.min.js"></script>
     <style>
-      :root {
-        --primary-yellow: #ffc300;
-        --primary-red: #ff5733;
-        --primary-black: #000000;
-        --primary-white: #ffffff;
-        --secondary-orange: #ffa500;
-      }
-
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
+      * {
         padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: var(--primary-yellow);
-      }
-
-      .upload-container {
-        width: 80%;
-        max-width: 800px;
-        margin: 20px auto;
-        background: var(--primary-red);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        text-align: center;
-      }
-
-      .upload-container h1 {
-        margin-bottom: 20px;
-        color: var(--primary-white);
-        font-size: 2em;
-      }
-
-      .file-input {
-        margin: 15px 0;
-        padding: 10px;
-        font-size: 1em;
-        border: 2px solid var(--primary-black);
-        border-radius: 6px;
-        background-color: var(--primary-white);
-        color: var(--primary-black);
-        cursor: pointer;
-      }
-
-      .charts-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        width: 90%;
-        padding: 20px;
+        margin: 0;
         box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
       }
-
-      .chart-container {
-        flex: 1;
-        background: var(--primary-white);
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      body {
+        height: 100vh;
+        background: linear-gradient(135deg, #f0e1d2, #f4d6a1); /* light beige to warm light chocolate */
       }
-
-      .chart-container h2 {
-        margin-bottom: 20px;
-        font-size: 1.8em;
-        color: var(--primary-red);
+      .wrapper {
+        width: 90%;
+        max-width: 34.37em;
+        max-height: 90vh;
+        background-color: #fff7e5; /* soft light beige */
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        padding: 3em;
+        border-radius: 1.5em;
+        box-shadow: 0 4em 5em rgba(27, 8, 53, 0.1);
       }
-
-      .chart {
+      .container {
+        position: relative;
         width: 100%;
         height: 100%;
       }
-
-      canvas {
-        max-width: 100%;
-        max-height: 85%;
+      #wheel {
+        max-height: inherit;
+        width: inherit;
+        top: 0;
+        padding: 0;
       }
+#spin-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  height: 70px; /* size increased */
+  width: 70px; /* size increased */
+  border-radius: 50%; /* fully circular */
+  cursor: pointer;
+  border: 0;
+  background: radial-gradient(#ffd084 50%, #e07b39 85%); /* lighter chocolate gradient */
+  color: #4a2c1e; /* deep chocolate text */
+  text-transform: uppercase;
+  font-size: 1.5em;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* subtle shadow for 3D effect */
+  transition: box-shadow 0.3s ease; /* only transition the shadow */
+}
 
-      .btn {
-        display: inline-block;
-        background: var(--primary-black);
-        color: var(--primary-white);
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1em;
+#spin-btn:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* stronger shadow on hover */
+}
+
+      img {
+        position: absolute;
+        width: 4em;
+        top: 45%;
+        right: -8%;
       }
-
-      .btn:hover {
-        background: var(--secondary-orange);
+      #final-value {
+        font-size: 1.5em;
+        text-align: center;
+        margin-top: 1.5em;
+        color: #4a2c1e; /* matching deep chocolate text */
+        font-weight: 500;
+      }
+      @media screen and (max-width: 768px) {
+        .wrapper {
+          font-size: 12px;
+        }
+        img {
+          right: -5%;
+        }
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <div class="upload-container">
-      <h1>Truffle Belly Analysis</h1>
-      <input
-        type="file"
-        id="csvFile"
-        class="file-input"
-        accept=".csv"
-        onchange="processCSV()"
-      />
-    </div>
-
-    <div class="charts-container">
-      <div class="chart-container">
-        <h2>Best Seller Products</h2>
-        <canvas id="chart1" class="chart"></canvas>
+    <div class="wrapper">
+      <div class="container">
+        <canvas id="wheel"></canvas>
+        <button id="spin-btn">Spin</button>
+        <img
+          src="https://gallery.yopriceville.com/var/resizes/Free-Clipart-Pictures/Arrows-PNG/Transparent_Blue_Arrow_PNG_Clipart.png?m=1629829858"
+          alt="spinner arrow"
+        />
       </div>
-      <div class="chart-container">
-        <h2>Sales Per Hour</h2>
-        <canvas id="chart2" class="chart"></canvas>
+      <div id="final-value">
+        <p>Click On The Spin Button To Start</p>
       </div>
     </div>
 
     <script>
-      let pieChart, barChart;
+      const wheel = document.getElementById("wheel");
+      const spinBtn = document.getElementById("spin-btn");
+      const finalValue = document.getElementById("final-value");
 
-      function processCSV() {
-        const fileInput = document.getElementById("csvFile");
-        const file = fileInput.files[0];
-        if (!file) {
-          alert("Please upload a CSV file.");
-          return;
-        }
+      // Define rotation values with probabilities
+      const rotationValues = [
+        { minDegree: 0, maxDegree: 30, value: '10%', probability: 20 },
+        { minDegree: 31, maxDegree: 90, value: '5%', probability: 38 },
+        { minDegree: 91, maxDegree: 150, value: 'Zonk', probability: 30 },
+        { minDegree: 151, maxDegree: 210, value: '50%', probability: 1 },
+        { minDegree: 211, maxDegree: 270, value: '100%', probability: 1 },
+        { minDegree: 271, maxDegree: 330, value: '15%', probability: 10 },
+      ];
 
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          const text = event.target.result;
-          const data = parseCSV(text);
-          generateCharts(data);
-        };
-        reader.readAsText(file);
-      }
+      // Pie chart data and colors
+      const data = [16, 16, 16, 16, 16, 16];
+      const pieColors = ["#ffd084", "#e07b39", "#ffd084", "#e07b39", "#ffd084", "#e07b39"]; /* lighter chocolate shades */
 
-      function parseCSV(text) {
-        const rows = text.split("\n").map((row) => row.split(","));
-        const headers = rows.shift();
-        const data = rows.map((row) => {
-          const obj = {};
-          headers.forEach((header, index) => {
-            obj[header.trim()] = row[index]?.trim();
-          });
-          return obj;
-        });
-        return data;
-      }
-
-      function resetCanvasSize(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-      }
-
-      function generateCharts(data) {
-        resetCanvasSize("chart1");
-        resetCanvasSize("chart2");
-
-        if (pieChart) pieChart.destroy();
-        if (barChart) barChart.destroy();
-
-        const productSales = {};
-        const hourlySales = Array(24).fill(0);
-
-        data.forEach((row) => {
-          const product = row["Pesanan"];
-          const quantity = parseInt(row["Quantity"]) || 0;
-          const time = row["Jam"];
-
-          if (product) {
-            productSales[product] = (productSales[product] || 0) + quantity;
-          }
-
-          if (time) {
-            const hour = parseInt(time.split(":")[0]);
-            hourlySales[hour] += quantity;
-          }
-        });
-
-        const filteredHours = [...Array(24).keys()].slice(9);
-        const filteredSales = hourlySales.slice(9);
-
-        pieChart = new Chart(document.getElementById("chart1"), {
-          type: "pie",
-          data: {
-            labels: Object.keys(productSales),
-            datasets: [
-              {
-                label: "Total Quantity Sold",
-                data: Object.values(productSales),
-                backgroundColor: [
-                  "#FF5733",
-                  "#FFC300",
-                  "#FFA500",
-                  "#FFBD69",
-                  "#FFD700",
-                ],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-          },
-        });
-
-        barChart = new Chart(document.getElementById("chart2"), {
-          type: "bar",
-          data: {
-            labels: filteredHours.map((hour) => `${hour}:00`),
-            datasets: [
-              {
-                label: "Total Sales Quantity",
-                data: filteredSales,
-                backgroundColor: "#FF5733",
-              },
-            ],
-          },
-          options: {
-            responsive: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { font: { size: 14, color: "#000000" } } },
-              y: { ticks: { font: { size: 14, color: "#000000" } } },
+      // Create Chart.js pie chart
+      let myChart = new Chart(wheel, {
+        plugins: [ChartDataLabels],
+        type: "pie",
+        data: {
+          labels: ['5%', '10%', '15%', '100%', '50%', 'Zonk'],
+          datasets: [{ backgroundColor: pieColors, data: data }],
+        },
+        options: {
+          responsive: true,
+          animation: { duration: 0 },
+          plugins: {
+            tooltip: false,
+            legend: { display: false },
+            datalabels: {
+              color: "#ffffff",
+              formatter: (_, context) => context.chart.data.labels[context.dataIndex],
+              font: { size: 24 },
             },
           },
+        },
+      });
+
+      // Generate random degree based on weighted probabilities
+      const getRandomDegree = () => {
+        const weightedArray = [];
+        rotationValues.forEach((item) => {
+          for (let i = 0; i < item.probability; i++) {
+            for (let degree = item.minDegree; degree <= item.maxDegree; degree++) {
+              weightedArray.push(degree);
+            }
+          }
         });
-      }
+        const randomIndex = Math.floor(Math.random() * weightedArray.length);
+        return weightedArray[randomIndex];
+      };
+
+      // Determine value from degree
+      const valueGenerator = (angleValue) => {
+        for (let i of rotationValues) {
+          if (angleValue >= i.minDegree && angleValue <= i.maxDegree) {
+            finalValue.innerHTML = `<p>Value: ${i.value}</p>`;
+            spinBtn.disabled = false;
+            break;
+          }
+        }
+      };
+
+      // Spinner logic
+      let count = 0;
+      let resultValue = 101;
+      spinBtn.addEventListener("click", () => {
+        spinBtn.disabled = true;
+        finalValue.innerHTML = `<p>Good Luck!</p>`;
+        let randomDegree = getRandomDegree();
+        let rotationInterval = window.setInterval(() => {
+          myChart.options.rotation += resultValue;
+          myChart.update();
+          if (myChart.options.rotation >= 360) {
+            count += 1;
+            resultValue -= 5;
+            myChart.options.rotation = 0;
+          } else if (count > 15 && myChart.options.rotation == randomDegree) {
+            valueGenerator(randomDegree);
+            clearInterval(rotationInterval);
+            count = 0;
+            resultValue = 101;
+          }
+        }, 10);
+      });
     </script>
   </body>
 </html>
